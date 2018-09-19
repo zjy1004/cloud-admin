@@ -1,6 +1,5 @@
 <template>
 <div class="cate">
-  <h1>我是分类列表</h1>
   <div class="breadcrumb">
     <el-breadcrumb separator-class="el-icon-arrow-right">
       <el-breadcrumb-item :to="{ path: '/layout/index' }">首页</el-breadcrumb-item>
@@ -32,8 +31,8 @@
     </el-table-column>
     <el-table-column
     prop="_id"
-    width="150"
-    label="ID">
+    width="300"
+    label="typeId">
     </el-table-column>
     <el-table-column
     width="150"
@@ -44,12 +43,21 @@
     </el-table-column>
     <el-table-column label="操作">
     <template slot-scope="scope">
-      <el-button size="small"  @click="handleEdit(scope.$index, scope.row)">详情</el-button>
-    <el-button size="small"  @click="handleDetail(scope.$index, scope.row)">详情</el-button>
-    <el-button size="mini" type="danger" @click="handleDelete(scope.$index, scope.row)">删除</el-button>
+      <el-button size="small"  @click="handleEdit(scope.row._id)">编辑</el-button>
+    <el-button size="small"  @click="handleDetail(scope.row._id)">详情</el-button>
+    <el-button size="mini" type="danger" @click="handleDelete(scope.row._id)">删除</el-button>
     </template>
     </el-table-column>
     </el-table>
+  </div>
+  <div class="page">
+    <el-pagination
+      background
+      layout="prev, pager, next"
+      @current-change="pageChange"
+      :page-size="5"
+      :total="100">
+    </el-pagination>
   </div>
 </div>
 </template>
@@ -60,18 +68,49 @@
       data() {
           return {
             tableData: [],
+            pn: 1,
+            count: 0
           }
       },
       methods:{
         getData() {
-         this.$axios.get('/category').then(res => {
+         this.$axios.get('/category', { pn: this.pn, size: 5}).then(res => {
            console.log(res)
            this.tableData = res.data
          })
         },
-        handleEdit() {},
-        handleDetail() {},
-        handleDelete() {},
+        handleEdit(id) {
+          this.$router.push(`/layout/editCate?id=${id}`)
+        },
+        handleDetail(id) {
+          this.$router.push(`/layout/cateDetail?id=${id}`)
+        },
+        handleDelete(id) {
+          this.$confirm('此操作将永久删除该管理员, 是否继续?', '警告', {
+            confirmButtonText: '确定',
+            cancelButtonText: '取消',
+            type: 'warning'
+          }).then(() => {
+            this.$axios.delete(`/category/${id}`).then(res => {
+              if(res.code == 200) {
+                this.$message.success('成功删除该分类')
+                this.getData()
+              }
+              else {
+                this.$message.error('删除该分类失败')
+              }
+            })
+          }).catch(() => {
+            this.$message({
+              type: 'info',
+              message: '已取消删除'
+            });
+          });
+        },
+        pageChange(pn) {
+          this.pn = pn
+          this.getData()
+        }
 
     },
       created () {
@@ -83,11 +122,19 @@
 <style scoped lang="scss">
 .cate{
   .cateList{
+    margin-top: 20px;
+    position: relative;
     .icon{
       width: 50px;
       height: 50px;
       border-radius: 100px;
     }
+  }
+  .page{
+    position: absolute;
+    left: 50%;
+    bottom: 0;
+    transform: translateX(-50%);
   }
 }
 </style>

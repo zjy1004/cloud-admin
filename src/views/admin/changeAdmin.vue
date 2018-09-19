@@ -7,7 +7,7 @@
         </el-breadcrumb>
       </div>
       <div class="channge-admin">
-        <el-form :label-position="labelPosition" label-width="100px" :model="formData">
+        <el-form label-position="left" label-width="100px" :model="formData">
           <el-form-item label="头像">
             <upload-img v-model="formData.avatar"></upload-img>
           </el-form-item>
@@ -33,15 +33,15 @@
 </template>
 
 <script>
-  import uploadImg from '../../components/uploadImg'
   import axios from 'axios'
+  import uploadImg from '../../components/uploadImg'
+
 
   export default {
       components: {uploadImg,},
       name: "changeAdmin",
       data () {
         return {
-          labelPosition: 'left',
           formData:{
             username: '',
             nickname: '',
@@ -61,7 +61,11 @@
           this.$axios.put('/user/userInfo', this.formData).then(res => {
             console.log(res);
             if(res.code == 200){
-
+              this.$message.success('修改成功')
+              this.$store.commit('CHANGE_USERINFO', res.data)
+              this.initData()
+            }else {
+              this.$message.error(res.msg)
             }
           })
         },

@@ -4,11 +4,11 @@
     <div class="login-box">
       <h2>请登录</h2>
       <div class="login">
-        <el-form>
-          <el-form-item label="用户名">
+        <el-form ref="form" :rules="rule" :model="formData">
+          <el-form-item label="用户名" prop="username">
             <el-input v-model="formData.username" placeholder="请输入用户名" :clearable="true"></el-input>
           </el-form-item>
-          <el-form-item label="密码">
+          <el-form-item label="密码" prop="password">
             <el-input v-model="formData.password" type="password" placeholder="请输入密码"></el-input>
           </el-form-item>
         </el-form>
@@ -23,13 +23,33 @@
 
 <script>
     export default {
+
       data() {
+        const validateUsername = (rule, value, callback)=> {
+          if(!value) {
+            callback(new Error('请输入合法用户名'))
+          }else {
+            callback()
+          }
+        };
+        const validatePassword = (rule, value, callback)=> {
+          if(value && value.length > 5) {
+              callback()
+          }else {
+            callback(new Error('请输入合法密码'))
+          }
+        };
         return {
+          isLoading: false,
           formData: {
             username:'',
             password:''
           },
-          isLoading: false
+          rule:{
+            username: [{ validator: validateUsername, trigger: 'blur' }],
+            password: [{ validator: validatePassword, trigger: 'blur' }]
+          }
+
         }
       },
       methods: {

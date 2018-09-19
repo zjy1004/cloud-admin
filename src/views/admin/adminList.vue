@@ -1,6 +1,5 @@
 <template>
     <div class="admin">
-      <h2>我是管理员列表</h2>
       <div class="breadcrumb">
         <el-breadcrumb separator-class="el-icon-arrow-right">
           <el-breadcrumb-item :to="{ path: '/layout/index' }">首页</el-breadcrumb-item>
@@ -39,11 +38,6 @@
             width="150"
             label="昵称">
           </el-table-column>
-          <!--<el-table-column-->
-          <!--prop="desc"-->
-          <!--width="250"-->
-          <!--label="个性签名">-->
-          <!--</el-table-column>-->
           <el-table-column
             prop="createdTime"
             width="220"
@@ -56,13 +50,21 @@
           </el-table-column>
           <el-table-column label="操作">
             <template slot-scope="scope">
-              <el-button size="small" type="primary" @click="handleDetail(scope.$index, scope.row)">查看详细</el-button>
-              <el-button size="mini" type="danger" @click="handleDelete(scope.$index, scope.row)">删除</el-button>
+              <el-button size="small" type="primary" @click="handleDetail(scope.row._id)">查看详细</el-button>
+              <el-button size="mini" type="danger" @click="handleDelete(scope.row._id)">删除</el-button>
             </template>
           </el-table-column>
         </el-table>
       </div>
-
+      <div class="page">
+        <el-pagination
+          background
+          layout="prev, pager, next"
+          @current-change="pageChange"
+          :page-size="5"
+          :total="100">
+        </el-pagination>
+      </div>
     </div>
 </template>
 
@@ -71,22 +73,49 @@
         name: "admin",
         data () {
              return {
-             tableData: []
+             tableData: [],
+             count: 0,
+             pn: 1
            }
         },
       methods: {
-          getData() {
-            this.$axios.get('/user').then(res => {
-              if (res.code == 200){
-                this.tableData = res.data
-              }
-            })
-          },
-        handleDetail() {
+        getData() {
+          this.$axios.get('/user',{pn: this.pn, size: 6}).then(res => {
+            if (res.code == 200){
+              this.count = res.count
+              this.tableData = res.data
+            }
+         })
+        },
+        handleDetail(id) {
             this.$router.push('/layout/changeAdmin')
         },
-        handleDelete(index, row) {
-              console.log(index,row)
+        handleDelete(id) {
+          this.$confirm('此操作将永久删除该分类, 是否继续?', '警告', {
+            confirmButtonText: '确定',
+            cancelButtonText: '取消',
+            type: 'warning'
+          }).then(() => {
+            this.$axios.post('/user/delete', {userIds:[id]}).then(res => {
+              if(res.code == 200) {
+                this.$message.success(res.msg)
+                this.getData()
+              }
+              else {
+
+              }
+            })
+          }).catch(() => {
+            this.$message({
+              type: 'info',
+              message: '已取消删除'
+            });
+          });
+        },
+        pageChange(pn) {
+          console.log(pn)
+          this.pn = pn
+          this.getData()
         },
       },
       created() {
@@ -96,13 +125,24 @@
 </script>
 
 <style scoped lang="scss">
-  .admin-user{
-    margin-left: 20px;
-    .avatar{
-      width: 60px;
-      height: 60px;
-      border-radius: 100px;
+  .admin{
+    .admin-user{
+      margin-top: 20px;
+      margin-left: 20px;
+      position: relative;
+      .avatar{
+        width: 60px;
+        height: 60px;
+        border-radius: 100px;
+      }
+    }
+    .page{
+      position: absolute;
+      left: 50%;
+      bottom: 0;
+      transform: translateX(-50%);
     }
   }
+
 
 </style>

@@ -7,9 +7,9 @@
         </el-breadcrumb>
       </div>
       <div class="admin-user">
-        <el-form :label-position="labelPosition" label-width="100px" :model="formData">
+        <el-form label-position="left" label-width="100px" :model="formData">
           <el-form-item label="头像">
-           <upload-img></upload-img>
+           <upload-img v-model="formData.avatar"></upload-img>
           </el-form-item>
           <el-form-item label="用户名:">
             <el-input v-model="formData.username"></el-input>
@@ -46,8 +46,6 @@
         name: "addAdmin",
       data () {
           return {
-            imageUrl: '',
-            labelPosition: 'left',
             formData: {
               username: '',
               password: '',
@@ -60,11 +58,18 @@
           }
       },
       methods: {
-        handleAvatarSuccess(res, file) {
-          this.imageUrl = URL.createObjectURL(file.raw);
-        },
-        handleClick() {
 
+        handleClick() {
+            if (this.formData.password != this.formData.checkPassword) {
+              this.$message.error('两次输入密码不一致，请重新输入')
+            } else {
+              this.$axios.post('/user', this.formData).then(res => {
+                if(res.code == 200) {
+                  this.$message.success('添加成功')
+                  this.$router.push('/layout/adminList')
+                }
+              })
+            }
         },
       },
     }

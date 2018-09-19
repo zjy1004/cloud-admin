@@ -2,7 +2,7 @@
   <label class="unload-wrap">
     <i class="el-icon-plus"  v-if="!imgUrl"></i>
     <img :src="imgUrl" v-else>
-    <input type="file" style="display: none" accept="image/jpeg,image/png,image/jpg" @changge="upload">
+    <input type="file" style="display: none"  @change="upload">
   </label>
 
 </template>
@@ -13,13 +13,13 @@
         name: "uploadImg",
         props: {
           value: {
-            type: String
+            type: [String]
           }
         },
       data() {
         return {
           token: '',
-          imgUrl: this.value
+          imgUrl: this.value,
         }
       },
       methods: {
@@ -30,7 +30,7 @@
         },
        upload(event) {
         let file = event.target.files[0]
-         let formData = FormData
+         let formData = new FormData()
          formData.append('file', file, file.name)
          formData.append('token', this.token)
 
@@ -40,8 +40,8 @@
            }
          }).then(res => {
            this.imgUrl = res.data.url
-           this.$emit('success', res.data.url)
            this.$emit('input', res.data.url)
+           this.$emit('success', res.data.url)
            this.$emit('change', res.data.url)
          })
        }
